@@ -4,6 +4,9 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
+    "dev": "tsx watch src/server.ts",
+    "seed": "tsx src/scripts/seed.ts",
+    "start": "node dist/server.js",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -13,6 +16,7 @@
   "devDependencies": {
     "@types/express": "^5.0.3",
     "@types/node": "^22.15.30",
+    "tsx": "^4.23.15",
     "typescript": "^5.8.3"
   }
 }
