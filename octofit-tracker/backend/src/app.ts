@@ -1,5 +1,5 @@
 import express from 'express';
-import { frontendOrigin } from './config/api.js';
+import { frontendOrigins } from './config/api.js';
 import { Activity } from './models/activity.js';
 import { Leaderboard } from './models/leaderboard.js';
 import { Team } from './models/team.js';
@@ -10,8 +10,9 @@ const app = express();
 
 app.use(express.json());
 app.use((request, response, next) => {
-  if (request.headers.origin === frontendOrigin) {
-    response.setHeader('Access-Control-Allow-Origin', frontendOrigin);
+  const { origin } = request.headers;
+  if (origin && frontendOrigins.includes(origin)) {
+    response.setHeader('Access-Control-Allow-Origin', origin);
     response.setHeader('Vary', 'Origin');
     response.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
     response.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');

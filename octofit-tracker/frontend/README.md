@@ -1,16 +1,31 @@
-# React + Vite
+# Octofit Tracker Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React 19 + Vite presentation tier using `react-router-dom` and Bootstrap.
 
-Currently, two official plugins are available:
+## Configuration
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+`VITE_CODESPACE_NAME` **must be defined** when running in GitHub Codespaces so the app can reach the API at `https://$VITE_CODESPACE_NAME-8000.app.github.dev`. Define it in `.env.local` (git-ignored):
 
-## React Compiler
+```bash
+VITE_CODESPACE_NAME=your-codespace-name
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+In a Codespace, the name is available as `$CODESPACE_NAME`:
 
-## Expanding the ESLint configuration
+```bash
+echo "VITE_CODESPACE_NAME=$CODESPACE_NAME" > octofit-tracker/frontend/.env.local
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+If `VITE_CODESPACE_NAME` is unset, the app falls back to `http://localhost:8000`. Restart the dev server after changing environment files.
+
+## Commands
+
+```bash
+npm run dev --prefix octofit-tracker/frontend
+npm run build --prefix octofit-tracker/frontend
+npm run lint --prefix octofit-tracker/frontend
+```
+
+## Views
+
+Routes `/activities`, `/leaderboard`, `/teams`, `/users`, and `/workouts` read from the matching `/api/<resource>/` endpoint. Both plain array and paginated (`{ results: [...] }`) responses are supported.
