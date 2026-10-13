@@ -1,4 +1,4 @@
-import mongoose, { Schema, Types } from 'mongoose';
+import mongoose, { Model, Schema, Types } from 'mongoose';
 
 export interface UserRecord {
   name: string;
@@ -6,7 +6,7 @@ export interface UserRecord {
   teamId?: Types.ObjectId;
 }
 
-const userSchema = new Schema<UserRecord>(
+const userSchema: Schema<UserRecord> = new Schema(
   {
     name: { type: String, required: true, trim: true },
     email: { type: String, required: true, lowercase: true, trim: true, unique: true },
@@ -15,5 +15,5 @@ const userSchema = new Schema<UserRecord>(
   { timestamps: true },
 );
 
-export const User =
-  mongoose.models.User || mongoose.model<UserRecord>('User', userSchema);
+export const User: Model<UserRecord> =
+  mongoose.models.User ?? mongoose.model('User', userSchema);

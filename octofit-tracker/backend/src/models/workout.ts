@@ -1,4 +1,4 @@
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { Model, Schema } from 'mongoose';
 
 export type WorkoutDifficulty = 'beginner' | 'intermediate' | 'advanced';
 
@@ -11,7 +11,7 @@ export interface WorkoutRecord {
   difficulty: WorkoutDifficulty;
 }
 
-const workoutSchema = new Schema<WorkoutRecord>(
+const workoutSchema: Schema<WorkoutRecord> = new Schema(
   {
     slug: { type: String, required: true, unique: true, lowercase: true, trim: true },
     title: { type: String, required: true, trim: true },
@@ -27,5 +27,5 @@ const workoutSchema = new Schema<WorkoutRecord>(
   { timestamps: true },
 );
 
-export const Workout =
-  mongoose.models.Workout || mongoose.model<WorkoutRecord>('Workout', workoutSchema);
+export const Workout: Model<WorkoutRecord> =
+  mongoose.models.Workout ?? mongoose.model('Workout', workoutSchema);

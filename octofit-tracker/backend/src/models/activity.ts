@@ -1,4 +1,4 @@
-import mongoose, { Schema, Types } from 'mongoose';
+import mongoose, { Model, Schema, Types } from 'mongoose';
 
 export type ActivityType = 'running' | 'cycling' | 'strength' | 'walking';
 
@@ -12,7 +12,7 @@ export interface ActivityRecord {
   date: Date;
 }
 
-const activitySchema = new Schema<ActivityRecord>(
+const activitySchema: Schema<ActivityRecord> = new Schema(
   {
     seedKey: { type: String, required: true, unique: true },
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
@@ -29,5 +29,5 @@ const activitySchema = new Schema<ActivityRecord>(
   { timestamps: true },
 );
 
-export const Activity =
-  mongoose.models.Activity || mongoose.model<ActivityRecord>('Activity', activitySchema);
+export const Activity: Model<ActivityRecord> =
+  mongoose.models.Activity ?? mongoose.model('Activity', activitySchema);

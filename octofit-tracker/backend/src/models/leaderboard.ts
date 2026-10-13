@@ -1,4 +1,4 @@
-import mongoose, { Schema, Types } from 'mongoose';
+import mongoose, { Model, Schema, Types } from 'mongoose';
 
 export interface LeaderboardRecord {
   userId: Types.ObjectId;
@@ -7,7 +7,7 @@ export interface LeaderboardRecord {
   rank: number;
 }
 
-const leaderboardSchema = new Schema<LeaderboardRecord>(
+const leaderboardSchema: Schema<LeaderboardRecord> = new Schema(
   {
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     period: { type: String, required: true, trim: true },
@@ -19,6 +19,5 @@ const leaderboardSchema = new Schema<LeaderboardRecord>(
 
 leaderboardSchema.index({ userId: 1, period: 1 }, { unique: true });
 
-export const LeaderboardEntry =
-  mongoose.models.LeaderboardEntry ||
-  mongoose.model<LeaderboardRecord>('LeaderboardEntry', leaderboardSchema);
+export const Leaderboard: Model<LeaderboardRecord> =
+  mongoose.models.Leaderboard ?? mongoose.model('Leaderboard', leaderboardSchema);

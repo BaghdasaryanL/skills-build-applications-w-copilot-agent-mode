@@ -1,7 +1,7 @@
 import express from 'express';
 import { frontendOrigin } from './config/api.js';
 import { Activity } from './models/activity.js';
-import { LeaderboardEntry } from './models/leaderboard.js';
+import { Leaderboard } from './models/leaderboard.js';
 import { Team } from './models/team.js';
 import { User } from './models/user.js';
 import { Workout } from './models/workout.js';
@@ -44,7 +44,7 @@ app.get('/api/activities/', async (_request, response) => {
 
 app.get('/api/leaderboard/', async (_request, response) => {
   response.json(
-    await LeaderboardEntry.find()
+    await Leaderboard.find()
       .populate('userId', 'name email')
       .sort({ points: -1, rank: 1 })
       .lean(),

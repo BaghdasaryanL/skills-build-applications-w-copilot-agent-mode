@@ -1,4 +1,4 @@
-import mongoose, { Schema, Types } from 'mongoose';
+import mongoose, { Model, Schema, Types } from 'mongoose';
 
 export interface TeamRecord {
   name: string;
@@ -7,7 +7,7 @@ export interface TeamRecord {
   members: Types.ObjectId[];
 }
 
-const teamSchema = new Schema<TeamRecord>(
+const teamSchema: Schema<TeamRecord> = new Schema(
   {
     name: { type: String, required: true, trim: true },
     slug: { type: String, required: true, unique: true, lowercase: true, trim: true },
@@ -17,5 +17,5 @@ const teamSchema = new Schema<TeamRecord>(
   { timestamps: true },
 );
 
-export const Team =
-  mongoose.models.Team || mongoose.model<TeamRecord>('Team', teamSchema);
+export const Team: Model<TeamRecord> =
+  mongoose.models.Team ?? mongoose.model('Team', teamSchema);

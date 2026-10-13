@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import { connectDatabase } from '../config/database.js';
 import { Activity } from '../models/activity.js';
-import { LeaderboardEntry } from '../models/leaderboard.js';
+import { Leaderboard } from '../models/leaderboard.js';
 import { Team } from '../models/team.js';
 import { User } from '../models/user.js';
 import { Workout } from '../models/workout.js';
@@ -13,28 +13,23 @@ async function seedDatabase() {
   try {
     await connectDatabase();
 
-    const users = await Promise.all([
-      User.findOneAndUpdate(
-        { email: 'maya.chen@example.com' },
-        { $set: { name: 'Maya Chen' } },
-        { upsert: true, new: true, setDefaultsOnInsert: true },
-      ),
-      User.findOneAndUpdate(
-        { email: 'leo.martinez@example.com' },
-        { $set: { name: 'Leo Martinez' } },
-        { upsert: true, new: true, setDefaultsOnInsert: true },
-      ),
-      User.findOneAndUpdate(
-        { email: 'imani.johnson@example.com' },
-        { $set: { name: 'Imani Johnson' } },
-        { upsert: true, new: true, setDefaultsOnInsert: true },
-      ),
-      User.findOneAndUpdate(
-        { email: 'noah.patel@example.com' },
-        { $set: { name: 'Noah Patel' } },
-        { upsert: true, new: true, setDefaultsOnInsert: true },
-      ),
-    ]);
+    const userSeeds = [
+      { email: 'maya.chen@example.com', name: 'Maya Chen' },
+      { email: 'leo.martinez@example.com', name: 'Leo Martinez' },
+      { email: 'imani.johnson@example.com', name: 'Imani Johnson' },
+      { email: 'noah.patel@example.com', name: 'Noah Patel' },
+    ];
+    const users = await Promise.all(
+      userSeeds.map(async ({ email, name }) => {
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+          existingUser.name = name;
+          return existingUser.save();
+        }
+
+        return User.create({ email, name });
+      }),
+    );
 
     const userByEmail = new Map(users.map((user) => [user.email, user]));
     const teamSeeds = [
@@ -53,13 +48,16 @@ async function seedDatabase() {
     ];
 
     const teams = await Promise.all(
-      teamSeeds.map(({ slug, name, description }) =>
-        Team.findOneAndUpdate(
-          { slug },
-          { $set: { name, description } },
-          { upsert: true, new: true, setDefaultsOnInsert: true },
-        ),
-      ),
+      teamSeeds.map(async ({ slug, name, description }) => {
+        const existingTeam = await Team.findOne({ slug });
+        if (existingTeam) {
+          existingTeam.name = name;
+          existingTeam.description = description;
+          return existingTeam.save();
+        }
+
+        return Team.create({ slug, name, description, members: [] });
+      }),
     );
     const teamBySlug = new Map(teams.map((team) => [team.slug, team]));
 
@@ -102,11 +100,13 @@ async function seedDatabase() {
       const { email: _email, daysAgo, ...record } = activity;
       const date = new Date();
       date.setDate(date.getDate() - daysAgo);
-      await Activity.findOneAndUpdate(
-        { seedKey: record.seedKey },
-        { $set: { ...record, userId: user._id, date } },
-        { upsert: true, new: true, setDefaultsOnInsert: true },
-      );
+      const existingActivity = await Activity.findOne({ seedKey: record.seedKey });
+      if (existingActivity) {
+        Object.assign(existingActivity, { ...record, userId: user._id, date });
+        await existingActivity.save();
+      } else {
+        await Activity.create({ ...record, userId: user._id, date });
+      }
     }
 
     const period = new Date().toISOString().slice(0, 7);
@@ -123,11 +123,19 @@ async function seedDatabase() {
         throw new Error(`Seeded user "${entry.email}" could not be found`);
       }
 
-      await LeaderboardEntry.findOneAndUpdate(
-        { userId: user._id, period },
-        { $set: { points: entry.points, rank: entry.rank } },
-        { upsert: true, new: true, setDefaultsOnInsert: true },
-      );
+      const existingEntry = await Leaderboard.findOne({ userId: user._id, period });
+      if (existingEntry) {
+        existingEntry.points = entry.points;
+        existingEntry.rank = entry.rank;
+        await existingEntry.save();
+      } else {
+        await Leaderboard.create({
+          userId: user._id,
+          period,
+          points: entry.points,
+          rank: entry.rank,
+        });
+      }
     }
 
     const workoutSeeds = [
@@ -167,11 +175,13 @@ async function seedDatabase() {
 
     for (const workout of workoutSeeds) {
       const { slug, ...fields } = workout;
-      await Workout.findOneAndUpdate(
-        { slug },
-        { $set: fields },
-        { upsert: true, new: true, setDefaultsOnInsert: true },
-      );
+      const existingWorkout = await Workout.findOne({ slug });
+      if (existingWorkout) {
+        Object.assign(existingWorkout, fields);
+        await existingWorkout.save();
+      } else {
+        await Workout.create({ slug, ...fields });
+      }
     }
 
     const [userCount, teamCount, activityCount, leaderboardCount, workoutCount] =
@@ -179,7 +189,7 @@ async function seedDatabase() {
         User.countDocuments(),
         Team.countDocuments(),
         Activity.countDocuments(),
-        LeaderboardEntry.countDocuments({ period }),
+        Leaderboard.countDocuments({ period }),
         Workout.countDocuments(),
       ]);
     console.info(
